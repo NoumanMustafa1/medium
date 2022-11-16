@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser,  BaseUserManager
+
 # Create your models here.
 current_time = timezone.now()
 
@@ -18,7 +19,30 @@ class USER(AbstractUser):
             self.role = self.base_role
             return super().save(*arg, **kwargs)
 
-# Create your models here.
+
+class ViewerManager(BaseUserManager):
+    def get_queryset(self,*args,**kwargs):
+        results = super().get_queryset(*args,**kwargs)
+
+class Viewer(USER):
+    base_role = USER.Role.VIEWER
+    
+    viewer = ViewerManager()
+    class Meta:
+        proxy = True
+
+class ReaderManager(BaseUserManager):
+    def get_queryset(self,*args,**kwargs):
+        results = super().get_queryset(*args,**kwargs)
+
+class Reader(USER):
+    base_role = USER.Role.READER
+    
+    reader = ReaderManager()
+    class Meta:
+        proxy = True
+
+
 class BlogModel(models.Model):
     img = models.ImageField(upload_to="images")
     reading_time = models.IntegerField(default=1)
